@@ -29,8 +29,8 @@
 <script type="text/javascript">
 var squares=[];
 var new_squares=[];
-var cols=10;
-var rows=10;
+var cols=50;
+var rows=50;
 var rerender = function(){
 	for( var row=0; row<rows; row++ ) {
 		for( var col=0; col<cols; col++ ) {
@@ -50,18 +50,20 @@ $(function(){
 			var klass = 'square';
 			var id = "sq" + col + 'x' + row;
 			$("#row"+row).append("<div id='"+id+"' class='"+klass+"'></div>");
-			squares[row][col] = { tag:id, alive:false }
+//			squares[row][col] = { tag:id, alive:false }
+			squares[row][col] = { tag:id, alive:(Math.random()>0.8) }
 		}
 	}
 
-//	plant some "seeds"
-	squares[3][3].alive = true;
-	squares[4][4].alive = true;
-	squares[5][5].alive = true;
+	//	plant some "seeds"
+//	squares[3][3].alive = true;
+//	squares[4][4].alive = true;
+//	squares[5][5].alive = true;
+//	squares[6][6].alive = true;
 	rerender();
 
 	for( var i=0; i<100; i++ ){
-		new_squares = $.extend(true, [], squares)
+		old_squares = $.extend(true, [], squares)
 
 
 //For a space that is 'populated':
@@ -70,13 +72,46 @@ $(function(){
 //    Each cell with two or three neighbors survives. 
 //For a space that is 'empty' or 'unpopulated'
 //    Each cell with three neighbors becomes populated. 
+		for( var row=0; row<rows; row++ ) {
+			for( var col=0; col<cols; col++ ) {
+				neighbors = []
+				if( row>0 ){
+					neighbors.push( old_squares[row-1][col] )
+					if( col>0 ){ neighbors.push( old_squares[row-1][col-1] ) }
+					if( col<(cols-1) ){ neighbors.push( old_squares[row-1][col+1] ) }
+				}
+				if( row<(rows-1) ){
+					neighbors.push( old_squares[row+1][col] )
+					if( col>0 ){ neighbors.push( old_squares[row+1][col-1] ) }
+					if( col<(cols-1) ){ neighbors.push( old_squares[row+1][col+1] ) }
+				}
+				if( col>0 ){ neighbors.push( old_squares[row][col-1] ) }
+				if( col<(cols-1) ){ neighbors.push( old_squares[row][col+1] ) }
 
-
-
-		squares = new_squares;
+				living_neighbors = neighbors.filter(function(e){return e.alive}).length
+				if( squares[row][col].alive ){
+					switch(living_neighbors){
+						case 2:
+						case 3:
+							squares[row][col].alive = true
+							break;
+						default:
+							squares[row][col].alive = false
+					}
+				} else {
+					switch(living_neighbors){
+						case 3:
+							squares[row][col].alive = true
+							break;
+						default:
+							squares[row][col].alive = false
+					}
+				}
+			}
+		}
 		rerender();
 	}
-
+//	alert('done');
 });
 </script>
 </head>
